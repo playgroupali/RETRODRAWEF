@@ -1,6 +1,6 @@
 {
-  "name": "Book Vault Reader",
-  "short_name": "Book Reader",
+  "name": "Retro Pixel Sketch Pad",
+  "short_name": "Pixel Pad",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#050505",
