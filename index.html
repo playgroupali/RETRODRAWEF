@@ -16,7 +16,6 @@
             --text-muted: #6B7280;
             --btn-bg: #1D4ED8; 
             --btn-text: #FFFFFF;
-            --brush-color: #1D4ED8; /* Default baseline color link */
             --grid-line: #E5E7EB;
         }
 
@@ -30,30 +29,26 @@
                 --text-muted: #A3A3A3;
                 --btn-bg: #FFFFFF;
                 --btn-text: #050505;
-                --brush-color: #3B82F6;
                 --grid-line: #1a1a1f;
             }
         }
 
-        /* DYNAMIC THEME BRUSH VARIABLE PASS-THROUGHS */
-        body.theme-red { --brush-color: #EF4444; }
-        body.theme-orange { --brush-color: #F97316; }
-        body.theme-yellow { --brush-color: #EAB308; }
-        body.theme-green { --brush-color: #22C55E; }
-        body.theme-blue { --brush-color: #3B82F6; }
-        body.theme-purple { --brush-color: #A855F7; }
-        body.theme-pink { --brush-color: #EC4899; }
-        body.theme-white { --brush-color: #000000; } /* Defaults black drawing ink in light mode */
+        /* PALETTE SCHEMES: Light-to-Dark background matching maps */
+        body.theme-red { --bg-body: #FEF2F2; --border-player: #FEE2E2; --text-main: #991B1B; --btn-bg: #EF4444; }
+        body.theme-orange { --bg-body: #FFF7ED; --border-player: #FFEDD5; --text-main: #9A3412; --btn-bg: #F97316; }
+        body.theme-yellow { --bg-body: #FEFCE8; --border-player: #FEF9C3; --text-main: #854D0E; --btn-bg: #EAB308; }
+        body.theme-green { --bg-body: #F0FDF4; --border-player: #DCFCE7; --text-main: #166534; --btn-bg: #22C55E; }
+        body.theme-blue { --bg-body: #EFF6FF; --border-player: #DBEAFE; --text-main: #1E40AF; --btn-bg: #3B82F6; }
+        body.theme-purple { --bg-body: #FAF5FF; --border-player: #F3E8FF; --text-main: #6B21A8; --btn-bg: #A855F7; }
+        body.theme-pink { --bg-body: #FDF2F8; --border-player: #FCE7F3; --text-main: #9D174D; --btn-bg: #EC4899; }
+        body.theme-white { --bg-body: #F4F4F5; --border-player: rgba(0,0,0,0.08); --text-main: #000000; --btn-bg: #000000; }
 
-        /* AUTOMATIC SYSTEM FORCING: Darkens background sheet dynamically inside Dark Mode */
+        /* AUTOMATIC BLACKOUT RULES: Background pages drops dark in system Dark Mode */
         @media (prefers-color-scheme: dark) {
             body, body[class*="theme-"] { --bg-body: #050505 !important; }
             .player-main { background-color: #0b0b0d !important; border-color: #16161a !important; box-shadow: 0 20px 45px rgba(0,0,0,0.5) !important; }
             h2, .theme-opt { color: #FFFFFF !important; }
             .btn { background-color: #FFFFFF !important; color: #050505 !important; }
-            
-            /* CRITICAL WHITE THEME CONTRAST FIX: Flips drawing color to white in Dark Mode so it doesn't vanish */
-            body.theme-white { --brush-color: #ffffff !important; }
         }
 
         body { background-color: var(--bg-body); color: var(--text-main); font-family: system-ui, -apple-system, sans-serif; margin: 0; min-height: 100vh; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 30px 20px; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -64,23 +59,18 @@
         
         h2 { font-weight: 700; font-size: 24px; letter-spacing: -0.5px; margin: 0 0 20px 0; }
 
-        /* FIXED DROPDOWN CABINET: Restored clean wide grid 4x2 layout rectangle box */
+        /* FIXED DROPDOWN PANEL DECK: Wide 4x2 geometry rectangle list drawer frame */
         .theme-panel { 
             position: absolute; top: 55px; right: 22px; background: var(--bg-player); 
             border: 1px solid var(--border-player); border-radius: 16px; padding: 12px; 
             display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.18); z-index: 50; width: 210px; box-sizing: border-box;
         }
-        .theme-opt { 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; width: 38px; height: 38px; border-radius: 10px; 
-            cursor: pointer; -webkit-tap-highlight-color: transparent;
-            transition: transform 0.1s ease;
-        }
+        .theme-opt { display: flex; align-items: center; justify-content: center; font-size: 22px; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .theme-opt:active { transform: scale(0.9); }
         .theme-opt.reset-opt { grid-column: span 4; width: 100%; height: 32px; font-size: 12px; font-weight: 700; color: var(--text-muted); border: 1px dashed var(--border-player); margin-top: 4px; border-radius: 8px; }
 
-        /* Premium Rhythmic Pixel Canvas Container Board Grid Layout */
+        /* Creative drawing board sandbox grid grid matrix container layout */
         .canvas-board {
             width: 290px; height: 290px; display: grid;
             grid-template-columns: repeat(16, 1fr); grid-template-rows: repeat(16, 1fr);
@@ -89,9 +79,21 @@
             margin-bottom: 25px; touch-action: none;
         }
         
-        .pixel-node {
-            border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line);
-            background-color: #ffffff; transition: background-color 0.05s ease;
+        .pixel-node { border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); background-color: #ffffff; }
+
+        /* FIXED: Master color mapping lookup table rules override inline variable blocks [INDEX] */
+        .pixel-node.c-red { background-color: #ef4444 !important; }
+        .pixel-node.c-orange { background-color: #f97316 !important; }
+        .pixel-node.c-yellow { background-color: #eab308 !important; }
+        .pixel-node.c-green { background-color: #22c55e !important; }
+        .pixel-node.c-blue { background-color: #3b82f6 !important; }
+        .pixel-node.c-purple { background-color: #a855f7 !important; }
+        .pixel-node.c-pink { background-color: #ec4899 !important; }
+        
+        /* FIXED: High contrast black/white ink rules link directly to your system background modes [INDEX] */
+        .pixel-node.c-white { background-color: #000000 !important; }
+        @media (prefers-color-scheme: dark) {
+            .pixel-node.c-white { background-color: #ffffff !important; }
         }
 
         .btn { background-color: var(--btn-bg); padding: 14px 20px; border-radius: 30px; border: none; color: var(--btn-text); font-weight: 700; font-size: 15px; cursor: pointer; display: inline-block; width: 100%; box-sizing: border-box; text-align: center; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -104,7 +106,6 @@
         <div class="player-main">
             <div class="settings-trigger" id="gearBtn" onclick="toggleThemeDropdownPanel()">⚙️</div>
             
-            <!-- FIXED PANEL STRUCTURE: Employs your custom wide rectangle 🩷 and ⚪️ palette maps -->
             <div class="theme-panel" id="themeDropdownMenu">
                 <div class="theme-opt" onclick="swapPlayerThemeProfile('RED')">🔴</div>
                 <div class="theme-opt" onclick="swapPlayerThemeProfile('ORANGE')">🟠</div>
@@ -118,17 +119,14 @@
             </div>
 
             <h2>Pixel Sandbox</h2>
-            
-            <!-- Core Interactive drawing deck grid surface box matrix -->
             <div class="canvas-board" id="pixelCanvasContainer"></div>
-            
             <button class="btn" onclick="clearCanvasBoardSandbox()">Clear Sketch Pad</button>
         </div>
     </div>
     <script>
         const themeMenu = document.getElementById('themeDropdownMenu');
         const canvasContainer = document.getElementById('pixelCanvasContainer');
-        let activeBrushMode = 'AUTO';
+        let activeBrushColorClass = 'c-blue'; // Baseline default paint ink configuration [INDEX]
         let isUserDrawingPointerDown = false;
 
         function toggleThemeDropdownPanel() {
@@ -138,21 +136,23 @@
         function swapPlayerThemeProfile(mode) {
             themeMenu.style.display = 'none';
             document.body.className = ""; 
-            activeBrushMode = mode;
             
             if (mode !== 'AUTO') {
                 document.body.classList.add(`theme-${mode.toLowerCase()}`);
+                activeBrushColorClass = `c-${mode.toLowerCase()}`; // Set painting register [INDEX]
+            } else {
+                // Return default auto color based on dark setting check loops
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                activeBrushColorClass = isDark ? 'c-blue' : 'c-blue';
             }
         }
 
-        // Initialize 16x16 Grid Node Clusters dynamically [INDEX]
         function compileSketchPadGrid() {
             canvasContainer.innerHTML = "";
             for (let i = 0; i < 256; i++) {
                 const node = document.createElement('div');
                 node.className = "pixel-node";
                 
-                // Add desktop mouse tracking safety triggers
                 node.addEventListener('mousedown', (e) => { isUserDrawingPointerDown = true; paintSingleGridPixelNode(node); });
                 node.addEventListener('mouseenter', () => { if (isUserDrawingPointerDown) paintSingleGridPixelNode(node); });
                 
@@ -160,7 +160,7 @@
             }
         }
 
-        // FIXED GESTURE DRAG CONTROL: Handles mobile fluid sliding touches accurately across Retina grids [INDEX]
+        // FIXED GESTURE DRAG CONTROL: Maps point traces directly onto node class registers perfectly [INDEX]
         canvasContainer.addEventListener('touchstart', (e) => { isUserDrawingPointerDown = true; processDragPaintingMovement(e); }, { passive: false });
         canvasContainer.addEventListener('touchmove', (e) => { processDragPaintingMovement(e); }, { passive: false });
         window.addEventListener('mouseup', () => { isUserDrawingPointerDown = false; });
@@ -169,7 +169,7 @@
         function processDragPaintingMovement(e) {
             e.preventDefault();
             if (!isUserDrawingPointerDown) return;
-            const touch = e.touches[0];
+            const touch = e.touches;
             const targetNodeElement = document.elementFromPoint(touch.clientX, touch.clientY);
             
             if (targetNodeElement && targetNodeElement.classList.contains('pixel-node')) {
@@ -177,15 +177,17 @@
             }
         }
 
+        // FIXED PAINT ENGINE: Completely swaps item node classes instead of injection variables to override filters [INDEX]
         function paintSingleGridPixelNode(targetNode) {
-            const styleReader = getComputedStyle(document.documentElement);
-            const activeColorValue = styleReader.getPropertyValue('--brush-color').trim();
-            targetNode.style.backgroundColor = activeColorValue;
+            // Remove old colors
+            targetNode.className = "pixel-node";
+            // Inject selected color profile class
+            targetNode.classList.add(activeBrushColorClass);
         }
 
         function clearCanvasBoardSandbox() {
             const allNodes = document.querySelectorAll('.pixel-node');
-            allNodes.forEach(node => { node.style.backgroundColor = '#ffffff'; });
+            allNodes.forEach(node => { node.className = "pixel-node"; });
         }
 
         window.addEventListener('DOMContentLoaded', compileSketchPadGrid);
