@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Offline Book Reader</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <!-- Load pdf.js cleanly over-the-air to handle rendering engine page parsing scripts -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        /* AUTOMATIC BASELINE CONFIGURATIONS: Default Light Mode */
+        :root {
+            --bg-body: #F0F7FF; 
+            --bg-card: #FFFFFF; 
+            --border-ui: #E1EFFE; 
+            --text-main: #1E3A8A; 
+            --text-muted: #6B7280;
+            --accent-glow: rgba(59, 130, 246, 0.25);
+            --btn-bg: #1D4ED8; 
+            --btn-text: #FFFFFF;
+        }
+
+        /* AUTOMATIC BASELINE CONFIGURATIONS: Default Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #050505;
+                --bg-card: #0b0b0d;
+                --border-ui: #16161a;
+                --text-main: #FFFFFF;
+                --text-muted: #A3A3A3;
+                --accent-glow: rgba(67, 100, 247, 0.35);
+                --btn-bg: #FFFFFF;
+                --btn-text: #050505;
+            }
+        }
+
+        /* MANUAL ACTIVE COLOR PALETTE ENGINE CONFIGURATIONS */
+        body.theme-red { --bg-body: #FEF2F2; --bg-card: #FFFFFF; --border-ui: #FEE2E2; --text-main: #991B1B; --text-muted: #EF4444; --accent-glow: rgba(239, 68, 68, 0.25); --btn-bg: #EF4444; --btn-text: #FFFFFF; }
+        body.theme-orange { --bg-body: #FFF7ED; --bg-card: #FFFFFF; --border-ui: #FFEDD5; --text-main: #9A3412; --text-muted: #F97316; --accent-glow: rgba(249, 115, 22, 0.25); --btn-bg: #F97316; --btn-text: #FFFFFF; }
+        body.theme-yellow { --bg-body: #FEFCE8; --bg-card: #FFFFFF; --border-ui: #FEF9C3; --text-main: #854D0E; --text-muted: #EAB308; --accent-glow: rgba(234, 179, 8, 0.25); --btn-bg: #EAB308; --btn-text: #FFFFFF; }
+        body.theme-green { --bg-body: #F0FDF4; --bg-card: #FFFFFF; --border-ui: #DCFCE7; --text-main: #166534; --text-muted: #22C55E; --accent-glow: rgba(34, 197, 94, 0.25); --btn-bg: #22C55E; --btn-text: #FFFFFF; }
+        body.theme-blue { --bg-body: #EFF6FF; --bg-card: #FFFFFF; --border-ui: #DBEAFE; --text-main: #1E40AF; --text-muted: #3B82F6; --accent-glow: rgba(59, 130, 246, 0.25); --btn-bg: #3B82F6; --btn-text: #FFFFFF; }
+        body.theme-purple { --bg-body: #FAF5FF; --bg-card: #FFFFFF; --border-ui: #F3E8FF; --text-main: #6B21A8; --text-muted: #A855F7; --accent-glow: rgba(168, 85, 247, 0.25); --btn-bg: #A855F7; --btn-text: #FFFFFF; }
+        body.theme-pink { --bg-body: #FDF2F8; --bg-card: #FFFFFF; --border-ui: #FCE7F3; --text-main: #9D174D; --text-muted: #EC4899; --accent-glow: rgba(236, 72, 153, 0.25); --btn-bg: #EC4899; --btn-text: #FFFFFF; }
+        body.theme-white { --bg-body: #F4F4F5; --bg-card: #FFFFFF; --border-ui: rgba(0,0,0,0.08); --text-main: #000000; --text-muted: #71717A; --accent-glow: rgba(0,0,0,0.04); --btn-bg: #000000; --btn-text: #FFFFFF; }
+
+        /* FORCED DARK MODE AUTOMATION OVERWRITES */
+        @media (prefers-color-scheme: dark) {
+            body[class*="theme-"] { --bg-body: #050505 !important; }
+            body.theme-white { --bg-card: #0b0b0d !important; --border-ui: #16161a !important; --text-main: #FFFFFF !important; --text-muted: #A3A3A3 !important; --btn-bg: #FFFFFF !important; --btn-text: #050505 !important; }
+        }
+
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: system-ui, -apple-system, sans-serif; margin: 0; min-height: 100vh; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 20px; transition: background-color 0.3s, color 0.3s; }
+        .app-container { display: flex; flex-direction: column; width: 100%; max-width: 360px; gap: 20px; height: 100vh; justify-content: center; position: relative; }
+        .main-card { position: relative; background-color: var(--bg-card); border: 1px solid var(--border-ui); border-radius: 24px; padding: 25px 20px; box-sizing: border-box; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 20px; }
+        .settings-trigger { position: absolute; top: 22px; right: 22px; font-size: 20px; cursor: pointer; opacity: 0.7; z-index: 60; line-height: 1; }
+        h2 { font-weight: 800; font-size: 24px; margin: 0; letter-spacing: -0.5px; }
+
+        /* Wide 4x2 Color Selection Panel Drawer Layout Rectangle */
+        .theme-panel { position: absolute; top: 55px; right: 22px; background: var(--bg-card); border: 1px solid var(--border-ui); border-radius: 16px; padding: 12px; display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 50; width: 210px; box-sizing: border-box; }
+        .theme-opt { display: flex; align-items: center; justify-content: center; font-size: 22px; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; }
+        .theme-opt.reset-opt { grid-column: span 4; width: 100%; height: 32px; font-size: 11px; font-weight: 700; color: var(--text-muted); border: 1px dashed var(--border-ui); margin-top: 4px; border-radius: 8px; }
+
+        /* Document Library Book Cover Shells */
+        .book-shelf { width: 100%; display: grid; grid-template-columns: 1fr; gap: 15px; max-height: 280px; overflow-y: auto; }
+        .book-cover-art { width: 100%; height: 160px; background: #1a1a1f; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-ui); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .book-cover-art canvas { width: 100%; height: 100%; object-fit: cover; }
+        .book-details { text-align: center; }
+        .book-title { font-size: 16px; font-weight: 700; margin: 5px 0 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .book-author { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+        input[type="file"] { display: none; }
+        .btn { background-color: var(--btn-bg); padding: 14px 20px; border-radius: 30px; border: none; color: var(--btn-text); font-weight: 700; font-size: 15px; cursor: pointer; text-align: center; transition: background-color 0.3s; }
+        
+        /* Dedicated Full-Screen Overlay Reader Frame */
+        .reader-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-card); z-index: 100; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .reader-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-ui); padding-bottom: 10px; }
+        .close-reader { font-size: 24px; cursor: pointer; }
+        .book-pages-content { font-size: 16px; line-height: 1.6; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="main-card">
+            <div class="settings-trigger" onclick="toggleThemeDropdownPanel()">⚙️</div>
+            
+            <!-- RESTORED: Compact wide 4x2 emoji rectangle including your 🩷 and ⚪️ symbols -->
+            <div class="theme-panel" id="themeDropdownMenu">
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('RED')">🔴</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('ORANGE')">🟠</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('YELLOW')">🟡</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('GREEN')">🟢</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('BLUE')">🔵</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('PURPLE')">🟣</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('PINK')">🩷</div>
+                <div class="theme-opt" onclick="swapPlayerThemeProfile('WHITE')">⚪️</div>
+                <div class="theme-opt reset-opt" onclick="swapPlayerThemeProfile('AUTO')">🔄 Reset to Auto Mode</div>
+            </div>
+
+            <h2>My Book Vault</h2>
+            
+            <div class="book-shelf" id="bookShelfContainer">
+                <div class="book-details" id="emptyShelfMessage">
+                    <div class="book-cover-art" style="color:var(--text-muted); font-size:40px;">📖</div>
+                    <p class="book-title">No books imported</p>
+                </div>
+            </div>
+
+            <label class="btn">Import PDF or Text File<input type="file" id="bookInputSelector" accept=".pdf,.txt"></label>
+        </div>
+    </div>    <!-- Expanded Reader Sheet Screen Overlay -->
+    <div class="reader-view" id="fullscreenReaderView">
+        <div class="reader-header">
+            <h3 id="readerBookTitle" style="margin:0; font-size:18px;">Reading</h3>
+            <div class="close-reader" onclick="exitReaderSessionDeck()">✕</div>
+        </div>
+        <div class="book-pages-content" id="readerTextSurface">
+            <!-- Book script text streams here -->
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cloudflare.com';
+
+        const themeMenu = document.getElementById('themeDropdownMenu');
+        const bookInput = document.getElementById('bookInputSelector');
+        const shelfContainer = document.getElementById('bookShelfContainer');
+        const readerView = document.getElementById('fullscreenReaderView');
+        const readerTitle = document.getElementById('readerBookTitle');
+        const readerSurface = document.getElementById('readerTextSurface');
+
+        function toggleThemeDropdownPanel() {
+            themeMenu.style.display = themeMenu.style.display === 'grid' ? 'none' : 'grid';
+        }
+
+        function swapPlayerThemeProfile(mode) {
+            themeMenu.style.display = 'none';
+            document.body.className = ""; 
+            if (mode !== 'AUTO') {
+                document.body.classList.add(`theme-${mode.toLowerCase()}`);
+                localStorage.setItem('reader_palette_cache', mode);
+            } else {
+                localStorage.setItem('reader_palette_cache', 'AUTO');
+            }
+        }
+
+        // Core Document File Reader Engine Checks [INDEX]
+        bookInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            shelfContainer.innerHTML = ""; // Clear loader slot
+
+            const bookCard = document.createElement('div');
+            bookCard.className = "book-details";
+            
+            const coverArtShell = document.createElement('div');
+            coverArtShell.className = "book-cover-art";
+            coverArtShell.id = "coverCanvasAnchor";
+            coverArtShell.innerText = "⏳";
+            
+            bookCard.appendChild(coverArtShell);
+            bookCard.innerHTML += `
+                <p class="book-title">${file.name.replace(/\.[^/.]+$ /, "")}</p>
+                <p class="book-author">Local Hardware Storage File</p>
+            `;
+            shelfContainer.appendChild(bookCard);
+
+            if (file.type === "application/pdf") {
+                parseAndRenderPDFBookDeck(file);
+            } else {
+                coverArtShell.innerText = "📄";
+                parseAndRenderTXTBookDeck(file);
+            }
+        });
+
+        // Extracts page 1 image to use as the visual cover art [INDEX]
+        function parseAndRenderPDFBookDeck(file) {
+            const fileReader = new FileReader();
+            fileReader.onload = function() {
+                const typedarray = new Uint8Array(this.result);
+                pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                    pdf.getPage(1).then(page => {
+                        const viewport = page.getViewport({ scale: 1.0 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        
+                        const anchor = document.getElementById('coverCanvasAnchor');
+                        anchor.innerHTML = "";
+                        anchor.appendChild(canvas);
+
+                        canvas.width = anchor.clientWidth * window.devicePixelRatio;
+                        canvas.height = anchor.clientHeight * window.devicePixelRatio;
+                        
+                        const renderContext = { canvasContext: context, viewport: viewport };
+                        page.render(renderContext);
+
+                        anchor.parentElement.onclick = () => {
+                            readerTitle.innerText = file.name;
+                            readerSurface.innerText = "PDF reading enabled. (Page 1 extracted as cover graphics).";
+                            readerView.style.display = "flex";
+                        };
+                    });
+                });
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        function parseAndRenderTXTBookDeck(file) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                const text = e.target.result;
+                const anchor = document.getElementById('coverCanvasAnchor');
+                anchor.parentElement.onclick = () => {
+                    readerTitle.innerText = file.name;
+                    readerSurface.innerText = text;
+                    readerView.style.display = "flex";
+                };
+            };
+            fileReader.readAsText(file);
+        }
+
+        function exitReaderSessionDeck() {
+            readerView.style.display = "none";
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedMode = localStorage.getItem('reader_palette_cache') || 'AUTO';
+            swapPlayerThemeProfile(savedMode);
+        });
+    </script>
+</body>
+</html>
+
