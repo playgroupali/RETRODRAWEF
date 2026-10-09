@@ -1,0 +1,8 @@
+{
+  "name": "Book Vault Reader",
+  "short_name": "Book Reader",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505"
+}
